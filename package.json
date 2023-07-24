@@ -1,0 +1,19 @@
+{
+  "name": "zisin_cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "index.js localhost:6055 test"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "ws": "^8.13.0"
+  }
+}
