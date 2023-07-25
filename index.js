@@ -3,6 +3,7 @@ const path = require('path');
 const wslib = require("./lib/cli.js");
 const { argv } = require('process');
 
+//a
 const ws2 = require("ws");
 const dataDir = path.join(__dirname, 'data'); // データを保存するディレクトリパ
 const previewsindo = 30;//プレビューする震度。これ以上ならログに流す
