@@ -25,7 +25,7 @@ async function senddiscord(data) {
                 return "緊急地震速報出"
                 break; 554
         }
-
+        ////あああああ
 
     }
     function sindo(data) {
