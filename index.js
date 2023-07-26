@@ -8,8 +8,8 @@ const ws2 = require("ws");
 const dataDir = path.join(__dirname, 'data'); // データを保存するディレクトリパ
 const previewsindo = 30;//プレビューする震度。これ以上ならログに流す
 let ipbuff = null;
-if (argv[3]){
-ipbuff = "ws://" + argv[3]
+if (argv[3]) {
+    ipbuff = "ws://" + argv[3]
 }
 const ip = ipbuff
 let typebuff = "";
@@ -18,10 +18,10 @@ if (argv[2] === "test") {
     typebuff = "zisintest"
     testbuff = true
     console.log("TEST MODE")
-if (ip === null){
-	console.log("Specity IP and PORT.");
-	process.exit();
-}
+    if (ip === null) {
+        console.log("Specity IP and PORT.");
+        process.exit();
+    }
 } else {
     typebuff = "zisin"
 };
@@ -247,8 +247,9 @@ function formatDate(date) {
 function saveDataAsTimestampedJSON(data) {
     const timestamp = formatDate(new Date()); // 現在の日付を取得してフォーマットする
     const filename = `${timestamp}.json`; // タイムスタンプをファイル名として使用
+    const dirPath = path.join(dataDir + "/" + String(data.code));
     const filePath = path.join(dataDir + "/" + String(data.code), filename);
-    createDirectoryIfNotExists(filePath)
+    createDirectoryIfNotExists(dirPath);
     fs.writeFile(filePath, JSON.stringify(data), (err) => {
         if (err) {
 
