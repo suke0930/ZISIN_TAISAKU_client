@@ -7,23 +7,31 @@ const { argv } = require('process');
 const ws2 = require("ws");
 const dataDir = path.join(__dirname, 'data'); // データを保存するディレクトリパ
 const previewsindo = 30;//プレビューする震度。これ以上ならログに流す
-const ip = "ws://" + argv[2];
+let ipbuff = null;
+if (argv[3]){
+ipbuff = "ws://" + argv[3]
+}
+const ip = ipbuff
 let typebuff = "";
 let testbuff = false
-if (argv[3] === "test") {
+if (argv[2] === "test") {
     typebuff = "zisintest"
     testbuff = true
     console.log("TEST MODE")
+if (ip === null){
+	console.log("Specity IP and PORT.");
+	process.exit();
+}
 } else {
     typebuff = "zisin"
 };
 const type = typebuff;
 const test = testbuff
 //console.log(argv[2])
-if (argv[2] === undefined) {
-    console.log("Specify IP and PORT.")
-    process.exit()
-};
+//if (argv[2] === undefined) {
+//    console.log("Specify IP and PORT.")
+//    process.exit()
+//};
 //console.log("BOOT")
 function createDirectoryIfNotExists(dirPath) {
     // 絶対パスを取得する
