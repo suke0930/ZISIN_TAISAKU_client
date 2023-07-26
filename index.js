@@ -2,10 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const wslib = require("./lib/cli.js");
 const { argv } = require('process');
-
+let dataDirbuff = null;
 //a
 const ws2 = require("ws");
-const dataDir = path.join(__dirname, 'data'); // データを保存するディレクトリパ
+
+
+
 const previewsindo = 30;//プレビューする震度。これ以上ならログに流す
 let ipbuff = null;
 if (argv[3]) {
@@ -14,7 +16,17 @@ if (argv[3]) {
 const ip = ipbuff
 let typebuff = "";
 let testbuff = false
+
+switch (key) {
+    case value:
+
+        break;
+
+    default:
+        break;
+}
 if (argv[2] === "test") {
+    dataDirbuff = path.join(__dirname, 'data_debug');
     typebuff = "zisintest"
     testbuff = true
     console.log("TEST MODE")
@@ -23,8 +35,12 @@ if (argv[2] === "test") {
         process.exit();
     }
 } else {
+    dataDirbuff = path.join(__dirname, 'data');
     typebuff = "zisin"
 };
+
+
+const dataDir = dataDirbuff;// データを保存するディレクトリパ
 const type = typebuff;
 const test = testbuff
 //console.log(argv[2])
@@ -250,6 +266,7 @@ function saveDataAsTimestampedJSON(data) {
     const dirPath = path.join(dataDir + "/" + String(data.code));
     const filePath = path.join(dataDir + "/" + String(data.code), filename);
     createDirectoryIfNotExists(dirPath);
+
     fs.writeFile(filePath, JSON.stringify(data), (err) => {
         if (err) {
 
@@ -258,6 +275,7 @@ function saveDataAsTimestampedJSON(data) {
             console.log('Data saved successfully.');
         }
     });
+
 }
 
 //DEV環境
