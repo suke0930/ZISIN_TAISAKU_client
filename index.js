@@ -5,6 +5,7 @@ const { argv } = require('process');
 let dataDirbuff = null;
 //a
 const ws2 = require("ws");
+//const { number } = require('sharp/lib/is.js');
 
 
 
@@ -13,7 +14,7 @@ let ipbuff = null;
 
 let typebuff = "";
 let testbuff = false
-
+let buffisdevdefaults = false;
 
 if (argv[2] === "test") {
 
@@ -24,6 +25,7 @@ if (argv[2] === "test") {
         console.log("Specity IP and PORT.");
         console.log("Use defaults Port(6010)")
         ipbuff = "6010"
+        buffisdevdefaults = true
     }
 
 
@@ -42,6 +44,7 @@ const ip = ipbuff
 const dataDir = dataDirbuff;// データを保存するディレクトリパ
 const type = typebuff;
 const test = testbuff
+const isdevdefaults = buffisdevdefaults
 //console.log(argv[2])
 //if (argv[2] === undefined) {
 //    console.log("Specify IP and PORT.")
@@ -280,7 +283,7 @@ function saveDataAsTimestampedJSON(data) {
 
 
 //DEV環境
-function devboot(ip, type, isfast) {
+function devboot(ip, type, isdevdefaults) {
     const server = new ws2.Server({ port: ip });
     console.log("server has started.")
     console.log("PORT" + ip)
@@ -301,9 +304,22 @@ function devboot(ip, type, isfast) {
         socket.on('close', () => {
             console.log('[TEST]Client disconnected');
         });
-        socket.on('error', () => {
-
-        });
+    });
+    server.on('error', (error) => {
+        if (isdevdefaults) {
+            if (error.code === "EADDRINUSE") {
+                if (ip === "6020") {
+                    console.log("too many port aleady use!")
+                    console.log("exit")
+                    process.exit();
+                }
+                const nextry = Number(ip) + 1;
+                console.log(`port:${ip} is aleady use
+                try use port:${nextry} 
+                `)
+                devboot(nextry, type, true)
+            }
+        };
     });
 }
 
@@ -329,7 +345,7 @@ function proboot(type) {
     });
 }
 
-if (test === true) { devboot(ip, type, true) }
+if (test === true) { devboot(ip, type, isdevdefaults) }
 
 
 if (test === false) { proboot(type) }
