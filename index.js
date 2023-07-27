@@ -10,36 +10,35 @@ const ws2 = require("ws");
 
 const previewsindo = 30;//プレビューする震度。これ以上ならログに流す
 let ipbuff = null;
-if (argv[3]) {
-    ipbuff = "ws://" + argv[3]
-}
-const ip = ipbuff
+
 let typebuff = "";
 let testbuff = false
 
-switch (key) {
-    case value:
 
-        break;
-
-    default:
-        break;
-}
 if (argv[2] === "test") {
+
+
+    if (argv[3]) {
+        ipbuff = argv[3]
+    } else {
+        console.log("Specity IP and PORT.");
+        console.log("Use defaults Port(6010)")
+        ipbuff = "6010"
+    }
+
+
+
     dataDirbuff = path.join(__dirname, 'data_debug');
     typebuff = "zisintest"
     testbuff = true
     console.log("TEST MODE")
-    if (ip === null) {
-        console.log("Specity IP and PORT.");
-        process.exit();
-    }
+
 } else {
     dataDirbuff = path.join(__dirname, 'data');
     typebuff = "zisin"
 };
 
-
+const ip = ipbuff
 const dataDir = dataDirbuff;// データを保存するディレクトリパ
 const type = typebuff;
 const test = testbuff
@@ -278,43 +277,62 @@ function saveDataAsTimestampedJSON(data) {
 
 }
 
+
+
 //DEV環境
-if (test === true) {
-    const server = new ws2.Server({ port: 6694 });
+function devboot(ip, type, isfast) {
+    const server = new ws2.Server({ port: ip });
+    console.log("server has started.")
+    console.log("PORT" + ip)
     server.on('connection', (socket) => {
+
         console.log(`[TEST]New client connected: ${socket._socket.remoteAddress}:${socket._socket.remotePort}`);
         socket.on('message', (data) => {
             const datapar = JSON.parse(data)
-            if (datapar.code !== 555 && datapar.code !== 9611) {
-                console.log("A")
-                saveDataAsTimestampedJSON(datapar);
-                senddiscord(datapar, type);
-
+            switch (datapar.code) {
+                case 551:
+                    senddiscord(datapar, type);
+                    break;
+                default:
+                    break;
             }
+            saveDataAsTimestampedJSON(datapar);
         });
         socket.on('close', () => {
             console.log('[TEST]Client disconnected');
+        });
+        socket.on('error', () => {
+
         });
     });
 }
 
 //本番環境
-if (test === false) {
+function proboot(type) {
     //READ ONLY!!!!!!////
     const ws = new ws2('wss://api.p2pquake.net/v2/ws');
     ws.on('open', () => {
         console.log('Connected to 地震 server.');
-
     });
     ws.on('message', (data) => {
         const datapar = JSON.parse(data)
-        if (datapar.code !== 555 && datapar.code !== 9611) {
-            senddiscord(datapar, type);
-            saveDataAsTimestampedJSON(datapar);
+
+        switch (datapar.code) {
+            case 551:
+                senddiscord(datapar, type);
+                break;
+            default:
+                break;
         }
+        saveDataAsTimestampedJSON(datapar);
+
     });
-    //READ ONLY!!!!!!////
 }
+
+if (test === true) { devboot(ip, type, true) }
+
+
+if (test === false) { proboot(type) }
 
 
 
