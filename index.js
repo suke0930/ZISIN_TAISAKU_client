@@ -5,6 +5,7 @@ const { argv } = require('process');
 let dataDirbuff = null;
 //a
 const ws2 = require("ws");
+const ip_wserver = "ws://localhost:6010"
 //const { number } = require('sharp/lib/is.js');
 
 
@@ -210,10 +211,10 @@ ${震度}
     const maxLength = 1500;
     const sprit = splitStringByMaxLengthWithNewline(各地の情報, maxLength);
 
-    await wslib.wssendms(type, tmpmessege1, ip).catch((error) => { console.log(error) })
+    await wslib.wssendms(type, tmpmessege1, ip_wserver).catch((error) => { console.log(error) })
 
     sprit.forEach(async (data) => {
-        await wslib.wssendms(type, data, ip).catch((error) => { console.log(error) })
+        await wslib.wssendms(type, data, ip_wserver).catch((error) => { console.log(error) })
         //  console.log("-----ここから----")
         //     console.log(data)
         //    console.log("-----ここまで----")
@@ -221,7 +222,7 @@ ${震度}
 
 
     setTimeout(async () => {
-        await wslib.wssendms(type, tmpmessegeend, ip).catch((error) => { console.log(error) })
+        await wslib.wssendms(type, tmpmessegeend, ip_wserver).catch((error) => { console.log(error) })
     }, 500);
 
 }
