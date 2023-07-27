@@ -5,8 +5,9 @@ const { argv } = require('process');
 let dataDirbuff = null;
 //a
 const ws2 = require("ws");
+let ip_wserverbuff = null
 try {
-    const ip_wserver = "ws://" + JSON.parse(fs.readFileSync("conf.json", 'utf8')).ip
+    ip_wserverbuff = "ws://" + JSON.parse(fs.readFileSync("conf.json", 'utf8')).ip
 } catch (error) {
     if ((error.errno === -2) && (error.syscall === "open")) {
         console.log(`you must set the conf.json!!`)
@@ -18,6 +19,7 @@ try {
     }
 
 }
+const ip_wserver = ip_wserverbuff
 
 
 //const { number } = require('sharp/lib/is.js');
