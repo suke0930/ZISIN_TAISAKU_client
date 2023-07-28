@@ -2,31 +2,66 @@ const fs = require('fs');
 const path = require('path');
 const wslib = require("./lib/cli.js");
 const { argv } = require('process');
-
+let dataDirbuff = null;
 //a
 const ws2 = require("ws");
-const dataDir = path.join(__dirname, 'data'); // データを保存するディレクトリパ
+let ip_wserverbuff = null
+try {
+    ip_wserverbuff = "ws://" + JSON.parse(fs.readFileSync("conf.json", 'utf8')).ip
+} catch (error) {
+    if ((error.errno === -2) && (error.syscall === "open")) {
+        console.log(`you must set the conf.json!!`)
+        process.exit();
+    } else {
+        console.log("Unknown error")
+        console.log(error)
+        process.exit();
+    }
+
+}
+const ip_wserver = ip_wserverbuff
+
+
+//const { number } = require('sharp/lib/is.js');
+
+
+
 const previewsindo = 30;//プレビューする震度。これ以上ならログに流す
 let ipbuff = null;
-if (argv[3]){
-ipbuff = "ws://" + argv[3]
-}
-const ip = ipbuff
+
 let typebuff = "";
 let testbuff = false
+let buffisdevdefaults = false;
+
 if (argv[2] === "test") {
+
+
+    if (argv[3]) {
+        ipbuff = argv[3]
+    } else {
+        console.log("Specity IP and PORT.");
+        console.log("Use defaults Port(6010)")
+        ipbuff = "6010"
+        buffisdevdefaults = true
+    }
+
+
+
+    dataDirbuff = path.join(__dirname, 'data_debug');
     typebuff = "zisintest"
     testbuff = true
     console.log("TEST MODE")
-if (ip === null){
-	console.log("Specity IP and PORT.");
-	process.exit();
-}
+
 } else {
+    dataDirbuff = path.join(__dirname, 'data');
     typebuff = "zisin"
 };
+
+const ip = ipbuff
+const dataDir = dataDirbuff;// データを保存するディレクトリパ
 const type = typebuff;
 const test = testbuff
+const isdevdefaults = buffisdevdefaults
 //console.log(argv[2])
 //if (argv[2] === undefined) {
 //    console.log("Specify IP and PORT.")
@@ -192,10 +227,10 @@ ${震度}
     const maxLength = 1500;
     const sprit = splitStringByMaxLengthWithNewline(各地の情報, maxLength);
 
-    await wslib.wssendms(type, tmpmessege1, ip).catch((error) => { console.log(error) })
+    await wslib.wssendms(type, tmpmessege1, ip_wserver).catch((error) => { console.log(error) })
 
     sprit.forEach(async (data) => {
-        await wslib.wssendms(type, data, ip).catch((error) => { console.log(error) })
+        await wslib.wssendms(type, data, ip_wserver).catch((error) => { console.log(error) })
         //  console.log("-----ここから----")
         //     console.log(data)
         //    console.log("-----ここまで----")
@@ -203,7 +238,7 @@ ${震度}
 
 
     setTimeout(async () => {
-        await wslib.wssendms(type, tmpmessegeend, ip).catch((error) => { console.log(error) })
+        await wslib.wssendms(type, tmpmessegeend, ip_wserver).catch((error) => { console.log(error) })
     }, 500);
 
 }
@@ -247,8 +282,10 @@ function formatDate(date) {
 function saveDataAsTimestampedJSON(data) {
     const timestamp = formatDate(new Date()); // 現在の日付を取得してフォーマットする
     const filename = `${timestamp}.json`; // タイムスタンプをファイル名として使用
+    const dirPath = path.join(dataDir + "/" + String(data.code));
     const filePath = path.join(dataDir + "/" + String(data.code), filename);
-    createDirectoryIfNotExists(filePath)
+    createDirectoryIfNotExists(dirPath);
+
     fs.writeFile(filePath, JSON.stringify(data), (err) => {
         if (err) {
 
@@ -257,45 +294,78 @@ function saveDataAsTimestampedJSON(data) {
             console.log('Data saved successfully.');
         }
     });
+
 }
 
+
+
 //DEV環境
-if (test === true) {
-    const server = new ws2.Server({ port: 6694 });
+function devboot(ip, type, isdevdefaults) {
+    const server = new ws2.Server({ port: ip });
+    console.log("server has started.")
+    console.log("PORT" + ip)
     server.on('connection', (socket) => {
+
         console.log(`[TEST]New client connected: ${socket._socket.remoteAddress}:${socket._socket.remotePort}`);
         socket.on('message', (data) => {
             const datapar = JSON.parse(data)
-            if (datapar.code !== 555 && datapar.code !== 9611) {
-                console.log("A")
-                saveDataAsTimestampedJSON(datapar);
-                senddiscord(datapar, type);
-
+            switch (datapar.code) {
+                case 551:
+                    senddiscord(datapar, type);
+                    break;
+                default:
+                    break;
             }
+            saveDataAsTimestampedJSON(datapar);
         });
         socket.on('close', () => {
             console.log('[TEST]Client disconnected');
         });
     });
+    server.on('error', (error) => {
+        if (isdevdefaults) {
+            if (error.code === "EADDRINUSE") {
+                if (ip === "6020") {
+                    console.log("too many port aleady use!")
+                    console.log("exit")
+                    process.exit();
+                }
+                const nextry = Number(ip) + 1;
+                console.log(`port:${ip} is aleady use
+                try use port:${nextry} 
+                `)
+                devboot(nextry, type, true)
+            }
+        };
+    });
 }
 
 //本番環境
-if (test === false) {
+function proboot(type) {
     //READ ONLY!!!!!!////
     const ws = new ws2('wss://api.p2pquake.net/v2/ws');
     ws.on('open', () => {
         console.log('Connected to 地震 server.');
-
     });
     ws.on('message', (data) => {
         const datapar = JSON.parse(data)
-        if (datapar.code !== 555 && datapar.code !== 9611) {
-            senddiscord(datapar, type);
-            saveDataAsTimestampedJSON(datapar);
+
+        switch (datapar.code) {
+            case 551:
+                senddiscord(datapar, type);
+                break;
+            default:
+                break;
         }
+        saveDataAsTimestampedJSON(datapar);
+
     });
-    //READ ONLY!!!!!!////
 }
+
+if (test === true) { devboot(ip, type, isdevdefaults) }
+
+
+if (test === false) { proboot(type) }
 
 
 
