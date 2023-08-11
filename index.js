@@ -348,6 +348,7 @@ function proboot(type) {
     setInterval(() => {
         count++;
         if (count > 180) {
+            console.log("りろーでぃん！！")
             return -1;
         }
     }, 1000);
