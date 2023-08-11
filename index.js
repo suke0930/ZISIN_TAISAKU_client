@@ -5,6 +5,7 @@ const { argv } = require('process');
 let dataDirbuff = null;
 //a
 const ws2 = require("ws");
+const { count } = require('console');
 let ip_wserverbuff = null
 try {
     ip_wserverbuff = "ws://" + JSON.parse(fs.readFileSync("conf.json", 'utf8')).ip
@@ -341,9 +342,20 @@ function devboot(ip, type, isdevdefaults) {
 }
 
 //本番環境
+
 function proboot(type) {
+    let conunt = 0;
+    setInterval(() => {
+        count++;
+        if (count > 180) {
+            return -1;
+        }
+    }, 1000);
+
+
     //READ ONLY!!!!!!////
     const ws = new ws2('wss://api.p2pquake.net/v2/ws');
+
     ws.on('open', () => {
         console.log('Connected to 地震 server.');
     });
@@ -352,6 +364,7 @@ function proboot(type) {
 
         switch (datapar.code) {
             case 551:
+                count = 0;
                 senddiscord(datapar, type);
                 break;
             default:
@@ -360,12 +373,21 @@ function proboot(type) {
         saveDataAsTimestampedJSON(datapar);
 
     });
+
 }
+
+
+
 
 if (test === true) { devboot(ip, type, isdevdefaults) }
 
 
-if (test === false) { proboot(type) }
+if (test === false) {
+    while (true === true) {
+        proboot(type);
+    }
+}
+
 
 
 
