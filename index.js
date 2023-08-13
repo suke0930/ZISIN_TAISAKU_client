@@ -244,6 +244,9 @@ ${震度}
     }, 500);
 
 }
+
+
+
 function splitStringByMaxLengthWithNewline(inputString, maxLength) {
     if (typeof inputString !== 'string' || inputString.length <= maxLength) {
         return [inputString];
@@ -348,22 +351,25 @@ function proboot(type) {
 
     return new Promise((resolve, reject) => {
         // ここに非同期処理を記述
+
+
+        //READ ONLY!!!!!!////
+        const ws = new ws2('wss://api.p2pquake.net/v2/ws');
         let count = 0;
         const intervalId = setInterval(() => {
             console.log(count);
             count++;
-            if (count > 30) {
+            if (count > 60) {
                 console.log("りろーでぃん！！");
                 clearInterval(intervalId); // インターバルを停止
+
+                ws.close();
+
                 resolve(1);
             }
         }, 1000);
-
-        //READ ONLY!!!!!!////
-        const ws = new ws2('wss://api.p2pquake.net/v2/ws');
-
         ws.on('open', () => {
-            console.log('Connected to 地震 server.');
+            console.log('ソケットが開きました');
         });
         ws.on('message', (data) => {
             const datapar = JSON.parse(data)
@@ -378,6 +384,9 @@ function proboot(type) {
             }
             saveDataAsTimestampedJSON(datapar);
 
+        });
+        ws.on('close', () => {
+            console.log('ソケットは正常に終了しました');
         });
     });
 }
