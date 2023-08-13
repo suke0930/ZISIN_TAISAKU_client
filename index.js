@@ -443,6 +443,9 @@ function proboot(type) {
             }
             saveDataAsTimestampedJSON(datapar);
         });
+        ws.on('close', () => {
+            console.log('ソケットは正常に終了しました');
+        });
     });
 }
 if (test === true) {

@@ -479,6 +479,9 @@ function proboot(type: string) {
             saveDataAsTimestampedJSON(datapar);
 
         });
+        ws.on('close', () => {
+            console.log('ソケットは正常に終了しました');
+        });
     });
 }
 
