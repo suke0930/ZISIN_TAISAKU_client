@@ -387,38 +387,75 @@ function devboot(ip, type, isdevdefaults) {
  * @param type DISCORD APIに送る指定の種類。詳しくはDISCORD APIを見ろ
  */
 function proboot(type) {
-    let count = 0;
-    setInterval(() => {
-        count++;
-        if (count > 180) {
-            console.log("りろーでぃん！！");
-            return -1;
-        }
-    }, 1000);
-    //READ ONLY!!!!!!////
-    const ws = new ws_1.default('wss://api.p2pquake.net/v2/ws');
-    ws.on('open', () => {
-        console.log('Connected to 地震 server.');
-    });
-    ws.on('message', (rawdata) => {
-        const stringdata = rawdata.toString();
-        const datapar = JSON.parse(stringdata);
-        switch (datapar.code) {
-            case 551:
-                count = 0;
-                senddiscord(datapar, type);
-                break;
-            default:
-                break;
-        }
-        saveDataAsTimestampedJSON(datapar);
+    // let count = 0;
+    // setInterval(() => {
+    //     count++;
+    //     if (count > 180) {
+    //         console.log("りろーでぃん！！")
+    //         return -1;
+    //     }
+    // }, 1000);
+    // //READ ONLY!!!!!!////
+    // const ws = new WebSocket('wss://api.p2pquake.net/v2/ws');
+    // ws.on('open', () => {
+    //     console.log('Connected to 地震 server.');
+    // });
+    // ws.on('message', (rawdata) => {
+    //     const stringdata = rawdata.toString();
+    //     const datapar: datapar = JSON.parse(stringdata);
+    //     switch (datapar.code) {
+    //         case 551:
+    //             count = 0;
+    //             senddiscord(datapar, type);
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    //     saveDataAsTimestampedJSON(datapar);
+    // });
+    return new Promise((resolve, reject) => {
+        // ここに非同期処理を記述
+        let count = 0;
+        const intervalId = setInterval(() => {
+            console.log(count);
+            count++;
+            if (count > 30) {
+                console.log("りろーでぃん！！");
+                clearInterval(intervalId); // インターバルを停止
+                resolve(1);
+            }
+        }, 1000);
+        //READ ONLY!!!!!!////
+        const ws = new ws_1.default('wss://api.p2pquake.net/v2/ws');
+        ws.on('open', () => {
+            console.log('Connected to 地震 server.');
+        });
+        ws.on('message', (rawdata) => {
+            const data = rawdata.toString();
+            const datapar = JSON.parse(data);
+            switch (datapar.code) {
+                case 551:
+                    count = 0;
+                    senddiscord(datapar, type);
+                    break;
+                default:
+                    break;
+            }
+            saveDataAsTimestampedJSON(datapar);
+        });
     });
 }
 if (test === true) {
     devboot(Number(ip), type, false);
 }
-if (test === false) {
-    while (true === true) {
-        proboot(type);
-    }
+function mainif() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (test === false) {
+            while (true === true) {
+                console.log("インスタンス生成!");
+                let result = yield proboot(type);
+            }
+        }
+    });
 }
+mainif();

@@ -414,37 +414,72 @@ function devboot(ip: number, type: string, isdevdefaults: boolean) {
  * @param type DISCORD APIに送る指定の種類。詳しくはDISCORD APIを見ろ
  */
 function proboot(type: string) {
-    let count = 0;
-    setInterval(() => {
-        count++;
-        if (count > 180) {
-            console.log("りろーでぃん！！")
-            return -1;
-        }
-    }, 1000);
+
+    // let count = 0;
+    // setInterval(() => {
+    //     count++;
+    //     if (count > 180) {
+    //         console.log("りろーでぃん！！")
+    //         return -1;
+    //     }
+    // }, 1000);
 
 
-    //READ ONLY!!!!!!////
-    const ws = new WebSocket('wss://api.p2pquake.net/v2/ws');
+    // //READ ONLY!!!!!!////
+    // const ws = new WebSocket('wss://api.p2pquake.net/v2/ws');
 
-    ws.on('open', () => {
-        console.log('Connected to 地震 server.');
+    // ws.on('open', () => {
+    //     console.log('Connected to 地震 server.');
+    // });
+    // ws.on('message', (rawdata) => {
+    //     const stringdata = rawdata.toString();
+    //     const datapar: datapar = JSON.parse(stringdata);
+    //     switch (datapar.code) {
+    //         case 551:
+    //             count = 0;
+    //             senddiscord(datapar, type);
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    //     saveDataAsTimestampedJSON(datapar);
+
+    // });
+    return new Promise((resolve, reject) => {
+        // ここに非同期処理を記述
+        let count = 0;
+        const intervalId = setInterval(() => {
+            console.log(count);
+            count++;
+            if (count > 30) {
+                console.log("りろーでぃん！！");
+                clearInterval(intervalId); // インターバルを停止
+                resolve(1);
+            }
+        }, 1000);
+
+        //READ ONLY!!!!!!////
+        const ws = new WebSocket('wss://api.p2pquake.net/v2/ws');
+
+        ws.on('open', () => {
+            console.log('Connected to 地震 server.');
+        });
+        ws.on('message', (rawdata: datapar) => {
+            const data: string = rawdata.toString();
+            const datapar: datapar = JSON.parse(data)
+
+            switch (datapar.code) {
+                case 551:
+                    count = 0;
+                    senddiscord(datapar, type);
+                    break;
+                default:
+                    break;
+            }
+            saveDataAsTimestampedJSON(datapar);
+
+        });
     });
-    ws.on('message', (rawdata) => {
-        const stringdata = rawdata.toString();
-        const datapar: datapar = JSON.parse(stringdata);
-        switch (datapar.code) {
-            case 551:
-                count = 0;
-                senddiscord(datapar, type);
-                break;
-            default:
-                break;
-        }
-        saveDataAsTimestampedJSON(datapar);
-
-    });
-
 }
 
 
@@ -453,12 +488,15 @@ function proboot(type: string) {
 if (test === true) { devboot(Number(ip), type, false) }
 
 
-if (test === false) {
-    while (true === true) {
-        proboot(type);
+async function mainif() {
+    if (test === false) {
+        while (true === true) {
+            console.log("インスタンス生成!")
+            let result: any = await proboot(type);
+        }
     }
 }
-
+mainif()
 
 
 
