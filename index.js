@@ -422,6 +422,7 @@ function proboot(type) {
             if (count > 30) {
                 console.log("りろーでぃん！！");
                 clearInterval(intervalId); // インターバルを停止
+                ws.close();
                 resolve(1);
             }
         }, 1000);
