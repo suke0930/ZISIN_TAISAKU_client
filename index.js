@@ -6,6 +6,7 @@ let dataDirbuff = null;
 //a
 const ws2 = require("ws");
 const { count } = require('console');
+const { promises } = require('stream');
 let ip_wserverbuff = null
 try {
     ip_wserverbuff = "ws://" + JSON.parse(fs.readFileSync("conf.json", 'utf8')).ip
@@ -344,38 +345,45 @@ function devboot(ip, type, isdevdefaults) {
 //本番環境
 
 function proboot(type) {
-    let conunt = 0;
-    setInterval(() => {
-        count++;
-        if (count > 180) {
-            console.log("りろーでぃん！！")
-            return -1;
-        }
-    }, 1000);
 
+    return new Promise((resolve, reject) => {
+        // ここに非同期処理を記述
+        let count = 0;
+        const intervalId = setInterval(() => {
+            console.log(count);
+            count++;
+            if (count > 30) {
+                console.log("りろーでぃん！！");
+                clearInterval(intervalId); // インターバルを停止
+                resolve(1);
+            }
+        }, 1000);
 
-    //READ ONLY!!!!!!////
-    const ws = new ws2('wss://api.p2pquake.net/v2/ws');
+        //READ ONLY!!!!!!////
+        const ws = new ws2('wss://api.p2pquake.net/v2/ws');
 
-    ws.on('open', () => {
-        console.log('Connected to 地震 server.');
+        ws.on('open', () => {
+            console.log('Connected to 地震 server.');
+        });
+        ws.on('message', (data) => {
+            const datapar = JSON.parse(data)
+
+            switch (datapar.code) {
+                case 551:
+                    count = 0;
+                    senddiscord(datapar, type);
+                    break;
+                default:
+                    break;
+            }
+            saveDataAsTimestampedJSON(datapar);
+
+        });
     });
-    ws.on('message', (data) => {
-        const datapar = JSON.parse(data)
-
-        switch (datapar.code) {
-            case 551:
-                count = 0;
-                senddiscord(datapar, type);
-                break;
-            default:
-                break;
-        }
-        saveDataAsTimestampedJSON(datapar);
-
-    });
-
 }
+
+
+
 
 
 
@@ -383,11 +391,15 @@ function proboot(type) {
 if (test === true) { devboot(ip, type, isdevdefaults) }
 
 
-if (test === false) {
-    while (true === true) {
-        proboot(type);
+async function mainif() {
+    if (test === false) {
+        while (true === true) {
+            console.log("インスタンス生成!")
+            let result = await proboot(type);
+        }
     }
 }
+mainif()
 
 
 
