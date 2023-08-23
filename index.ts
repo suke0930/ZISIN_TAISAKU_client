@@ -6,6 +6,8 @@ const wslib = require("./lib/cli.js");
 import { argv } from 'process';
 import { json } from 'stream/consumers';
 import WebSocket from 'ws';
+import { webserver } from "./lib/webserver.js"
+
 //import { WebSocketServer } from 'ws';
 /**
  * P2P地震対策APIから送られてくる情報の型
@@ -414,37 +416,6 @@ function devboot(ip: number, type: string, isdevdefaults: boolean) {
  * @param type DISCORD APIに送る指定の種類。詳しくはDISCORD APIを見ろ
  */
 function proboot(type: string) {
-
-    // let count = 0;
-    // setInterval(() => {
-    //     count++;
-    //     if (count > 180) {
-    //         console.log("りろーでぃん！！")
-    //         return -1;
-    //     }
-    // }, 1000);
-
-
-    // //READ ONLY!!!!!!////
-    // const ws = new WebSocket('wss://api.p2pquake.net/v2/ws');
-
-    // ws.on('open', () => {
-    //     console.log('Connected to 地震 server.');
-    // });
-    // ws.on('message', (rawdata) => {
-    //     const stringdata = rawdata.toString();
-    //     const datapar: datapar = JSON.parse(stringdata);
-    //     switch (datapar.code) {
-    //         case 551:
-    //             count = 0;
-    //             senddiscord(datapar, type);
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    //     saveDataAsTimestampedJSON(datapar);
-
-    // });
     return new Promise((resolve, reject) => {
         // ここに非同期処理を記述
         let count = 0;
@@ -493,12 +464,18 @@ if (test === true) { devboot(Number(ip), type, false) }
 
 
 async function mainif() {
+    const webserverins = new webserver("3000", "AA");
+    webserverins.on();
     if (test === false) {
         while (true === true) {
             console.log("インスタンス生成!")
             let result: any = await proboot(type);
         }
     }
+
+
+
+
 }
 mainif()
 
